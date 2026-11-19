@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Churn Analyzer</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+    <div class="brand-mark">CA</div>
+    <div>
+        <h1>Customer Churn Analyzer</h1>
+        <p>Customer retention prediction system</p>
+    </div>
+    <a class="docs-link" href="/docs" target="_blank">API Docs</a>
+</header>
+
+<main class="container">
+    <section class="intro">
+        <div>
+            <p class="eyebrow">MACHINE LEARNING PROJECT</p>
+            <h2>Understand customer<br>retention risk.</h2>
+            <p class="intro-copy">Enter a customer's account and service details to estimate the likelihood of churn.</p>
+        </div>
+        <div class="intro-stat">
+            <span class="stat-label">Prediction engine</span>
+            <strong>ML Model</strong>
+            <span class="stat-note">Trained on Telco customer data</span>
+        </div>
+    </section>
+
+    <section class="workspace">
+        <form id="churnForm">
+            <div class="form-heading">
+                <div>
+                    <h3>Customer information</h3>
+                    <p>Complete the fields below and select Predict Churn.</p>
+                </div>
+                <span class="required-note">All fields required</span>
+            </div>
+
+            <h4>Personal details</h4>
+            <div class="form-grid">
+                <label>Gender
+                    <select name="gender"><option>Female</option><option>Male</option></select>
+                </label>
+                <label>Senior citizen
+                    <select name="SeniorCitizen"><option value="0">No</option><option value="1">Yes</option></select>
+                </label>
+                <label>Partner
+                    <select name="Partner"><option>No</option><option>Yes</option></select>
+                </label>
+                <label>Dependents
+                    <select name="Dependents"><option>No</option><option>Yes</option></select>
+                </label>
+            </div>
+
+            <h4>Account information</h4>
+            <div class="form-grid">
+                <label>Tenure (months)
+                    <input name="tenure" type="number" min="0" max="1000" value="12" required>
+                </label>
+                <label>Contract
+                    <select name="Contract"><option>Month-to-month</option><option>One year</option><option>Two year</option></select>
+                </label>
+                <label>Paperless billing
+                    <select name="PaperlessBilling"><option>Yes</option><option>No</option></select>
+                </label>
+                <label>Payment method
+                    <select name="PaymentMethod">
+                        <option>Electronic check</option>
+                        <option>Mailed check</option>
+                        <option>Bank transfer (automatic)</option>
+                        <option>Credit card (automatic)</option>
+                    </select>
+                </label>
+            </div>
+
+            <h4>Subscribed services</h4>
+            <div class="form-grid">
+                <label>Phone service
+                    <select name="PhoneService"><option>Yes</option><option>No</option></select>
+                </label>
+                <label>Multiple lines
+                    <select name="MultipleLines"><option>No</option><option>Yes</option><option>No phone service</option></select>
+                </label>
+                <label>Internet service
+                    <select name="InternetService"><option>Fiber optic</option><option>DSL</option><option>No</option></select>
+                </label>
+                <label>Online security
+                    <select name="OnlineSecurity"><option>No</option><option>Yes</option><option>No internet service</option></select>
+                </label>
+                <label>Online backup
+                    <select name="OnlineBackup"><option>No</option><option>Yes</option><option>No internet service</option></select>
+                </label>
+                <label>Device protection
+                    <select name="DeviceProtection"><option>No</option><option>Yes</option><option>No internet service</option></select>
+                </label>
+                <label>Tech support
+                    <select name="TechSupport"><option>No</option><option>Yes</option><option>No internet service</option></select>
+                </label>
+                <label>Streaming TV
+                    <select name="StreamingTV"><option>No</option><option>Yes</option><option>No internet service</option></select>
+                </label>
+                <label>Streaming movies
+                    <select name="StreamingMovies"><option>No</option><option>Yes</option><option>No internet service</option></select>
+                </label>
+            </div>
+
+            <h4>Billing details</h4>
+            <div class="form-grid">
+                <label>Monthly charges
+                    <input name="MonthlyCharges" type="number" min="0" step="0.01" value="70.00" required>
+                </label>
+                <label>Total charges
+                    <input name="TotalCharges" type="number" min="0" step="0.01" value="840.00" required>
+                </label>
+            </div>
+
+            <div class="actions">
+                <button type="reset" class="reset-btn">Reset form</button>
+                <button type="submit" class="predict-btn" id="predictBtn">Predict churn <span>→</span></button>
+            </div>
+            <p id="errorMessage" class="error-message"></p>
+        </form>
+
+        <aside class="result-panel">
+            <div class="result-top">
+                <span class="result-icon">◎</span>
+                <span class="result-label">PREDICTION RESULT</span>
+            </div>
+            <h3 id="resultTitle">Awaiting customer data</h3>
+            <p id="resultDescription">Submit the form to view the estimated churn probability and risk category.</p>
+            <div class="probability-block">
+                <div class="probability-line">
+                    <span>Churn probability</span>
+                    <strong id="probability">--</strong>
+                </div>
+                <div class="progress-track"><div id="progressBar"></div></div>
+            </div>
+            <div class="result-details">
+                <div><span>Risk category</span><strong id="risk">--</strong></div>
+                <div><span>Model used</span><strong id="model">--</strong></div>
+            </div>
+            <div class="note">
+                <strong>Note</strong>
+                <p>This result is a model-based estimate, not a guarantee of future customer behaviour.</p>
+            </div>
+        </aside>
+    </section>
+    <footer>Customer Churn Analyzer · Academic Machine Learning Project</footer>
+</main>
+
+<script>
+const form = document.getElementById("churnForm");
+const errorMessage = document.getElementById("errorMessage");
+const predictBtn = document.getElementById("predictBtn");
+
+form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    errorMessage.textContent = "";
+    predictBtn.disabled = true;
+    predictBtn.textContent = "Analyzing...";
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    ["SeniorCitizen", "tenure"].forEach(key => data[key] = Number(data[key]));
+    ["MonthlyCharges", "TotalCharges"].forEach(key => data[key] = Number(data[key]));
+
+    try {
+        const response = await fetch("/predict", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.detail || "Prediction failed.");
+
+        document.getElementById("resultTitle").textContent = result.prediction;
+        document.getElementById("resultDescription").textContent =
+            result.prediction === "Churn"
+            ? "The model estimates that this customer may discontinue the service."
+            : "The model estimates that this customer is likely to continue the service.";
+        document.getElementById("probability").textContent = result.churn_probability + "%";
+        document.getElementById("progressBar").style.width = result.churn_probability + "%";
+        document.getElementById("risk").textContent = result.risk_level;
+        document.getElementById("model").textContent = result.model_used;
+        document.getElementById("risk").className = "risk-" + result.risk_level.toLowerCase();
+    } catch (error) {
+        errorMessage.textContent = error.message;
+    } finally {
+        predictBtn.disabled = false;
+        predictBtn.innerHTML = 'Predict churn <span>→</span>';
+    }
+});
+</script>
+</body>
+</html>
